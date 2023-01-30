@@ -80,6 +80,10 @@ public class PMerge{
     public static void main(String[] args) {
         int[] A = {1, 2, 3, 4, 5};
         int[] B = {4, 5, 6, 7, 8, 9, 10};
+//        int[] A = {1, 2, 3, 4, 5};
+//        int[] B = {6, 7, 8, 9, 10};
+//        int[] A = {1, 5, 7, 8, 9, 11, 23, 24, 25, 26};
+//        int[] B = {1, 2, 3, 4, 5, 7, 8, 9, 10, 15, 16, 30, 31, 33, 80};
         int[] C = new int[A.length + B.length];
         int numThreads = 1;
 
