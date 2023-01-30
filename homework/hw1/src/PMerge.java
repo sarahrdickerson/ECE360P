@@ -17,7 +17,7 @@ public class PMerge{
             for(int i = A.length-1; i >= 0; i--) {
                 int rank = rank(A[i], B);
                 C[C.length-1-(rank+i)] = A[i];
-                System.out.println("From A[" + i + "] = " + A[i] + ": C[rank=" + rank + " + i=" + i + ", " + (rank+i) + "] = " + C[rank+i]);
+//                System.out.println("From A[" + i + "] = " + A[i] + ": C[rank=" + rank + " + i=" + i + ", " + (rank+i) + "] = " + C[rank+i]);
             }
 
             for(int i = B.length-1; i >= 0; i--) {
@@ -26,7 +26,7 @@ public class PMerge{
                     rank--;
                 }
                 C[C.length-1-(rank+i)] = B[i];
-                System.out.println("From B[" + i + "] = " + B[i] + ": C[rank=" + rank + " + i=" + i + ", " + (rank+i) + "] = " + C[rank+i]);
+//                System.out.println("From B[" + i + "] = " + B[i] + ": C[rank=" + rank + " + i=" + i + ", " + (rank+i) + "] = " + C[rank+i]);
             }
         }
 
@@ -85,7 +85,7 @@ public class PMerge{
 
         printArr(A);
         printArr(B);
-        printArr(C);
+//        printArr(C);
 
         parallelMerge(A, B, C, numThreads);
 
