@@ -34,4 +34,28 @@ public class PMerge{
             System.out.println(e);
         }
     }
+
+    public static void printArr(int[] arr) {
+        System.out.print("array of len " + arr.length + ": ");
+        for(int a : arr) {
+            System.out.print(a + " ");
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        int[] A = {1, 2, 3, 4, 5};
+        int[] B = {4, 5, 6, 7, 8, 9, 10};
+        int[] C = new int[10];
+        int numThreads = 2;
+
+        printArr(A);
+        printArr(B);
+        printArr(C);
+
+        parallelMerge(A, B, C, numThreads);
+
+        System.out.println("After parallel merge");
+        printArr(C);
+    }
 }
