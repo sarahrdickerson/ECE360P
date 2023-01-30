@@ -16,6 +16,27 @@ public class PMerge{
         public void run() {
 
         }
+
+        /*
+         * Given some number a in arr, return the index of the largest element in arr smaller than a
+         * @param   int     a       some number in arr
+         *          int[]   arr     array to search through
+         * @return  int     left    index of largest element in arr smaller than a OR 0 if no elements smaller
+         */
+        public static int rank(int a, int[] arr) {
+            int left = 0;
+            int right = arr.length;
+
+            while(left < right) {
+                int mid = left + (right-left)/2;
+                if (a < arr[mid]) {
+                    right = mid;
+                } else {
+                    left = mid+1;
+                }
+            }
+            return left;
+        }
     }
 
     public static void parallelMerge(int[] A, int[] B, int[] C, int numThreads) {
