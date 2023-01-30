@@ -58,25 +58,20 @@ public class ForkJoinPSort extends RecursiveTask<Integer>{
             sequentialSort(A, begin, end);
             return end;
         } else {
-            int i = begin, j = end - 1;
+            int i = begin-1;
             // pick last element as pivot
             int pivot = A[end];
 
-            while (i <= j) {
-                if (A[i] <= A[end]) {
+            for(int j = begin; j <= end-1; j++) {
+                // if element is smaller than pivot swap with beginning of array
+                if (A[j] < pivot) {
                     i++;
-                    continue;
+                    swap(A, i, j);
                 }
-                if (A[j] >= A[end]) {
-                    j--;
-                    continue;
-                }
-                swap(A, i, j);
-                j--;
-                i++;
             }
-            swap(A, j + 1, end);
-            return j+1;
+            // A[i] is last index of elements smaller than pivot
+            swap(A, i+1, end);
+            return i+1; // return pivot index
         }
     }
 
@@ -90,17 +85,21 @@ public class ForkJoinPSort extends RecursiveTask<Integer>{
 
     public static void main (String[] args) {
         int[] arr_5 = { 5, 3, 4, 1, 2};
-        int[] arr_32 = {10, 30, 20, 50, 70, 40, 100};
-        int[] arr = {32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+        int[] arr_slay = {10, 30, 20, 50, 70, 40, 100};
+        int[] arr_notworking = {32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+        int[] arr = {10, 6, 3, 5, 89, 2, 7, 21, 18, 29, 20, 17, 15, 14, 22, 38, 90, 98, 70, 66};
 
         System.out.println("arr size: " + arr.length);
         for (int j : arr) {
             System.out.print(j+ " ");
         }
 
-        ForkJoinPool pool = ForkJoinPool.commonPool();
+        int processors = Runtime.getRuntime().availableProcessors();
+        System.out.println("\nNumber of processors: " + processors);
+        ForkJoinPSort fork = new ForkJoinPSort(arr, 0, arr.length-1, true);
+        ForkJoinPool pool = new ForkJoinPool(processors);
 
-        pool.invoke(new ForkJoinPSort(arr, 0, arr.length-1, true));
+        pool.invoke(fork);
 
         System.out.println();
         for (int j : arr) {
