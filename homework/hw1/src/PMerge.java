@@ -3,6 +3,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class PMerge{
+    // holds indices of where each subarray starts based on numThreads
+    static int[] aSubArrIndices, bSubArrIndices;
+    static int numThreads;
 
     private static class Merge extends Thread {
         int[] A, B, C;
@@ -52,11 +55,30 @@ public class PMerge{
         }
     }
 
+    private static void calculateSubArrIndicies(int[] arrIndicies, int arrSize, int numThreads) {
+        int bucketSize = arrSize/numThreads;
+        for(int i = 0, j=0; i < arrSize && j < arrIndicies.length; i++) {
+            if(i%(bucketSize) == 0) {
+                arrIndicies[j] = i;
+                j++;
+            }
+        }
+    }
+
     public static void parallelMerge(int[] A, int[] B, int[] C, int numThreads) {
         // arrays A and B are sorted in the ascending order
         // These arrays may have different sizes.
         // array C is the merged array sorted in the descending order
         // your implementation goes here.
+
+        // Create subarray dividers based on numThreads needed
+        PMerge.numThreads = numThreads;
+        aSubArrIndices = new int[numThreads];
+        bSubArrIndices = new int[numThreads];
+
+        calculateSubArrIndicies(aSubArrIndices, A.length, numThreads);
+        calculateSubArrIndicies(bSubArrIndices, B.length, numThreads);
+
         try {
             ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
             for(int i = 0; i < numThreads; i++) {
@@ -85,7 +107,7 @@ public class PMerge{
 //        int[] A = {1, 5, 7, 8, 9, 11, 23, 24, 25, 26};
 //        int[] B = {1, 2, 3, 4, 5, 7, 8, 9, 10, 15, 16, 30, 31, 33, 80};
         int[] C = new int[A.length + B.length];
-        int numThreads = 1;
+        int numThreads = 2;
 
         printArr(A);
         printArr(B);
