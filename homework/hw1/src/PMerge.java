@@ -22,19 +22,26 @@ public class PMerge{
         }
 
         public void run() {
-            for(int i = A.length-1; i >= 0; i--) {
+            for(int i = aEnd-1; i >= aStart; i--) {
                 int rank = rank(A[i], B);
+//                if(C[C.length-1-(rank+i)] == A[i]) {
+//                    rank--;
+//                }
                 C[C.length-1-(rank+i)] = A[i];
-//                System.out.println("From A[" + i + "] = " + A[i] + ": C[rank=" + rank + " + i=" + i + ", " + (rank+i) + "] = " + C[rank+i]);
+//                System.out.println("From A[" + i + "] = " + A[i] + ": C[rank=" + rank + " + i=" + i + ", " + (C.length-1-(rank+i)) + "] = " + C[C.length-1-(rank+i)]);
             }
 
-            for(int i = B.length-1; i >= 0; i--) {
+            for(int i = bEnd-1; i >= bStart; i--) {
                 int rank = rank(B[i], A);
-                if(C[C.length-1-(rank+i)] == B[i]) {
+//                if(C[C.length-1-(rank+i)] == B[i]) {
+//                    rank--;
+//                }
+                if(rank > 0 && A[rank-1] == B[i]) {
+//                    System.out.println("A[" + (rank-1) + "] = " + A[rank-1] + " B[" + i + "] = " + B[i]);
                     rank--;
                 }
                 C[C.length-1-(rank+i)] = B[i];
-//                System.out.println("From B[" + i + "] = " + B[i] + ": C[rank=" + rank + " + i=" + i + ", " + (rank+i) + "] = " + C[rank+i]);
+//                System.out.println("From B[" + i + "] = " + B[i] + ": C[rank=" + rank + " + i=" + i + ", " + (C.length-1-(rank+i)) + "] = " + C[C.length-1-(rank+i)]);
             }
         }
 
@@ -88,6 +95,7 @@ public class PMerge{
         try {
             ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
             for(int i = 0; i < numThreads; i++) {
+                System.out.println("thread " + i + " with A[" + aSubArrIndices[i] + ", " + aSubArrIndices[i+1] + ") and B[" + bSubArrIndices[i] + ", " + bSubArrIndices[i+1] + ")");
                 threadPool.submit(new Merge(A, B, C, aSubArrIndices[i], aSubArrIndices[i+1], bSubArrIndices[i], bSubArrIndices[i+1]));
             }
             threadPool.shutdown();
@@ -113,7 +121,7 @@ public class PMerge{
 //        int[] A = {1, 5, 7, 8, 9, 11, 23, 24, 25, 26};
 //        int[] B = {1, 2, 3, 4, 5, 7, 8, 9, 10, 15, 16, 30, 31, 33, 80};
         int[] C = new int[A.length + B.length];
-        int numThreads = 2;
+        int numThreads = 5;
 
         printArr(A);
         printArr(B);
