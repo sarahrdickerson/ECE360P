@@ -9,11 +9,16 @@ public class PMerge{
 
     private static class Merge extends Thread {
         int[] A, B, C;
+        int aStart, aEnd, bStart, bEnd;
 
-        public Merge(int[] A, int[] B, int[] C) {
+        public Merge(int[] A, int[] B, int[] C, int aStart, int aEnd, int bStart, int bEnd) {
             this.A = A;
             this.B = B;
             this.C = C;
+            this.aStart = aStart;
+            this.aEnd = aEnd;
+            this.bStart = bStart;
+            this.bEnd = bEnd;
         }
 
         public void run() {
@@ -57,12 +62,13 @@ public class PMerge{
 
     private static void calculateSubArrIndicies(int[] arrIndicies, int arrSize, int numThreads) {
         int bucketSize = arrSize/numThreads;
-        for(int i = 0, j=0; i < arrSize && j < arrIndicies.length; i++) {
+        for(int i = 0, j=0; i < arrSize && j < arrIndicies.length-1; i++) {
             if(i%(bucketSize) == 0) {
                 arrIndicies[j] = i;
                 j++;
             }
         }
+        arrIndicies[arrIndicies.length-1] = arrSize;
     }
 
     public static void parallelMerge(int[] A, int[] B, int[] C, int numThreads) {
@@ -73,8 +79,8 @@ public class PMerge{
 
         // Create subarray dividers based on numThreads needed
         PMerge.numThreads = numThreads;
-        aSubArrIndices = new int[numThreads];
-        bSubArrIndices = new int[numThreads];
+        aSubArrIndices = new int[numThreads+1];
+        bSubArrIndices = new int[numThreads+1];
 
         calculateSubArrIndicies(aSubArrIndices, A.length, numThreads);
         calculateSubArrIndicies(bSubArrIndices, B.length, numThreads);
@@ -82,7 +88,7 @@ public class PMerge{
         try {
             ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
             for(int i = 0; i < numThreads; i++) {
-                threadPool.submit(new Merge(A, B, C));
+                threadPool.submit(new Merge(A, B, C, aSubArrIndices[i], aSubArrIndices[i+1], bSubArrIndices[i], bSubArrIndices[i+1]));
             }
             threadPool.shutdown();
             threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
