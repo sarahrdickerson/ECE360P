@@ -1,109 +1,107 @@
-import java.util.Arrays;
-import java.util.concurrent.RecursiveTask;
-import java.util.concurrent.ForkJoinPool;
+//UT-EID = tco343 & srd2729
 
-public class ForkJoinPSort extends RecursiveTask<Integer>{
+import java.awt.geom.QuadCurve2D;
+import java.util.*;
+import java.util.concurrent.*;
 
-    static int[] arr;
-    static int beg;
-    static int en;
-    static boolean inc;
+public class ForkJoinPSort {
+    /* Notes:
+     * The input array (A) is also the output array,
+     * The range to be sorted extends from index begin, inclusive, to index end, exclusive,
+     * Sort in increasing order when increasing=true, and decreasing order when increasing=false,
+     */
 
-    public ForkJoinPSort(int[] A, int beginning, int end, boolean increasing) {
-        arr = A;
-        beg = beginning;
-        en = end;
-        inc = increasing;
-    }
+    private static class QuickSort extends RecursiveAction{
+        int[] arr;
+        int begin;
+        int end;
+        boolean increasing;
 
-    @Override
-    protected Integer compute() {
-        if (beg >= en) {
-            return null;
+        QuickSort(int[] arr, int begin, int end, boolean increasing) {
+            this.arr = arr;
+            this.begin = begin;
+            this.end = end;
+            this.increasing = increasing;
         }
 
-        int pivotInd = partition(arr, beg, en);
-
-        ForkJoinPSort left = new ForkJoinPSort(arr, beg, pivotInd-1, inc);
-        ForkJoinPSort right = new ForkJoinPSort(arr, pivotInd+1, en, inc);
-
-        left.fork();
-        right.compute();
-
-        left.join();
-
-        return null;
-    }
-
-    private void sequentialSort(int[] A, int begin, int end) {
-        for(int i = begin+1; i <= end; i++) {
-            int val = A[i];
-            int j = i-1;
-            while(j>=0 && A[j] > val) {
-                A[j+1] = A[j];
-                j -= 1;
-            }
-            A[j+1] = val;
-        }
-    }
-
-    private void swap(int[] A, int i, int j) {
-        int temp = A[i];
-        A[i] = A[j];
-        A[j] = temp;
-    }
-
-    private int partition(int[] A, int begin, int end)  {
-        if(end-begin+1 <= 16) { // size <= 16 so perform sequential sort on this array
-            sequentialSort(A, begin, end);
-            return end;
-        } else {
-            int i = begin-1;
-            // pick last element as pivot
-            int pivot = A[end];
-
-            for(int j = begin; j <= end-1; j++) {
-                // if element is smaller than pivot swap with beginning of array
-                if (A[j] < pivot) {
-                    i++;
-                    swap(A, i, j);
+        private static void insertionSort(int[] arr, int begin, int end, boolean increasing) {
+            if (increasing) {
+                for (int i = begin + 1; i <= end; i++) {
+                    int current = arr[i];
+                    int j = i - 1;
+                    while (j >= begin && arr[j] > current) {
+                        arr[j + 1] = arr[j];
+                        j = j - 1;
+                    }
+                    arr[j + 1] = current;
                 }
             }
-            // A[i] is last index of elements smaller than pivot
-            swap(A, i+1, end);
-            return i+1; // return pivot index
+            else {
+                for (int i = begin + 1; i <= end; i++) {
+                    int current = arr[i];
+                    int j = i - 1;
+                    while (j >= begin && arr[j] < current) {
+                        arr[j + 1] = arr[j];
+                        j = j - 1;
+                    }
+                    arr[j + 1] = current;
+                }
+            }
+        }
+        private int partition(int pivot){
+            int left = begin;
+            int right = end;
+            while(left <= right){
+                if(increasing) {
+                    while (arr[left] < pivot)
+                        left++;
+                    while (arr[right] > pivot)
+                        right--;
+                }
+                else{
+                    while (arr[left] > pivot)
+                        left++;
+                    while (arr[right] < pivot)
+                        right--;
+                }
+                if(left <= right){
+                    int temp = arr[left];
+                    arr[left] = arr[right];
+                    arr[right] = temp;
+                    left++;
+                    right--;
+                }
+            }
+            return left;
+        }
+
+        @Override
+        protected void compute() {
+            if((end - begin + 1) <= 16){
+                insertionSort(arr, begin, end, increasing);
+            }
+            else {
+                int pivot = arr[(begin + end) / 2];
+                int index = partition(pivot);
+                QuickSort left = new QuickSort(arr, begin, index - 1, this.increasing);
+                QuickSort right = new QuickSort(arr, index, end, this.increasing);
+                // Might change!!!
+                left.fork();
+                right.compute();
+                left.join();
+                /*
+                left.compute();
+                right.compute();
+                 */
+            }
         }
     }
 
     public static void parallelSort(int[] A, int begin, int end, boolean increasing) {
-        // your implementation goes here.
-        arr = A;
-        beg = begin;
-        en = end;
-        inc = increasing;
-    }
-
-    public static void main (String[] args) {
-        int[] arr_5 = { 5, 3, 4, 1, 2};
-        int[] arr_slay = {10, 30, 20, 50, 70, 40, 100};
-        int[] arr_notworking = {32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
-        int[] arr = {10, 6, 3, 5, 89, 2, 7, 21, 18, 29, 20, 17, 15, 14, 22, 38, 90, 98, 70, 66};
-
-        System.out.println("arr size: " + arr.length);
-        for (int j : arr) {
-            System.out.print(j+ " ");
-        }
-
+        // TODO: Implement your parallel sort function using ForkJoinPool
         int processors = Runtime.getRuntime().availableProcessors();
-        System.out.println("\nNumber of processors: " + processors);
-        ForkJoinPSort fork = new ForkJoinPSort(arr, 0, arr.length-1, true);
+        QuickSort qs = new QuickSort(A, begin, end - 1, increasing);
         ForkJoinPool pool = new ForkJoinPool(processors);
-
-        pool.invoke(fork);
-
-        System.out.println();
-        for (int j : arr) {
-            System.out.print(j + " ");
-        }
+        pool.invoke(qs);
     }
 }
