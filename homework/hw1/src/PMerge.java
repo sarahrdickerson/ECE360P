@@ -4,13 +4,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class PMerge{
-    // holds indices of where each subarray starts based on numThreads
-    static int[] aSubArrIndices, bSubArrIndices;
-    static int numThreads;
 
     private static class Merge extends Thread {
         int[] A, B, C;
-        int aStart, aEnd, bStart, bEnd;
 
         public Merge(int[] A, int[] B, int[] C) {
             this.A = A;
@@ -62,8 +58,6 @@ public class PMerge{
      */
     public static void parallelMerge(int[] A, int[] B, int[] C, int numThreads) {
         // TODO: Implement your parallel merge function
-        // Create subarray dividers based on numThreads needed
-        PMerge.numThreads = numThreads;
 
         try {
             ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
@@ -75,13 +69,5 @@ public class PMerge{
         } catch (InterruptedException e) {
             System.out.println(e);
         }
-    }
-
-    public static void printArr(int[] arr) {
-        System.out.print("array of len " + arr.length + ": ");
-        for(int a : arr) {
-            System.out.print(a + " ");
-        }
-        System.out.println();
     }
 }
