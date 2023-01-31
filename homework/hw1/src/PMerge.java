@@ -1,8 +1,7 @@
 //UT-EID = tco343 & srd2729
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class PMerge{
     // holds indices of where each subarray starts based on numThreads
@@ -56,12 +55,13 @@ public class PMerge{
         }
     }
 
+    /* Notes:
+     * Arrays A and B are sorted in the ascending order
+     * These arrays may have different sizes.
+     * Array C is the merged array sorted in the descending order
+     */
     public static void parallelMerge(int[] A, int[] B, int[] C, int numThreads) {
-        // arrays A and B are sorted in the ascending order
-        // These arrays may have different sizes.
-        // array C is the merged array sorted in the descending order
-        // your implementation goes here.
-
+        // TODO: Implement your parallel merge function
         // Create subarray dividers based on numThreads needed
         PMerge.numThreads = numThreads;
 
