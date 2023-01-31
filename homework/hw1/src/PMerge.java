@@ -11,31 +11,21 @@ public class PMerge{
         int[] A, B, C;
         int aStart, aEnd, bStart, bEnd;
 
-        public Merge(int[] A, int[] B, int[] C, int aStart, int aEnd, int bStart, int bEnd) {
+        public Merge(int[] A, int[] B, int[] C) {
             this.A = A;
             this.B = B;
             this.C = C;
-            this.aStart = aStart;
-            this.aEnd = aEnd;
-            this.bStart = bStart;
-            this.bEnd = bEnd;
         }
 
         public void run() {
-            for(int i = aEnd-1; i >= aStart; i--) {
+            for(int i = A.length-1; i >= 0; i--) {
                 int rank = rank(A[i], B);
-//                if(C[C.length-1-(rank+i)] == A[i]) {
-//                    rank--;
-//                }
                 C[C.length-1-(rank+i)] = A[i];
 //                System.out.println("From A[" + i + "] = " + A[i] + ": C[rank=" + rank + " + i=" + i + ", " + (C.length-1-(rank+i)) + "] = " + C[C.length-1-(rank+i)]);
             }
 
-            for(int i = bEnd-1; i >= bStart; i--) {
+            for(int i = B.length-1; i >= 0; i--) {
                 int rank = rank(B[i], A);
-//                if(C[C.length-1-(rank+i)] == B[i]) {
-//                    rank--;
-//                }
                 if(rank > 0 && A[rank-1] == B[i]) {
 //                    System.out.println("A[" + (rank-1) + "] = " + A[rank-1] + " B[" + i + "] = " + B[i]);
                     rank--;
@@ -67,17 +57,6 @@ public class PMerge{
         }
     }
 
-    private static void calculateSubArrIndicies(int[] arrIndicies, int arrSize, int numThreads) {
-        int bucketSize = arrSize/numThreads;
-        for(int i = 0, j=0; i < arrSize && j < arrIndicies.length-1; i++) {
-            if(i%(bucketSize) == 0) {
-                arrIndicies[j] = i;
-                j++;
-            }
-        }
-        arrIndicies[arrIndicies.length-1] = arrSize;
-    }
-
     public static void parallelMerge(int[] A, int[] B, int[] C, int numThreads) {
         // arrays A and B are sorted in the ascending order
         // These arrays may have different sizes.
@@ -86,17 +65,11 @@ public class PMerge{
 
         // Create subarray dividers based on numThreads needed
         PMerge.numThreads = numThreads;
-        aSubArrIndices = new int[numThreads+1];
-        bSubArrIndices = new int[numThreads+1];
-
-        calculateSubArrIndicies(aSubArrIndices, A.length, numThreads);
-        calculateSubArrIndicies(bSubArrIndices, B.length, numThreads);
 
         try {
             ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
             for(int i = 0; i < numThreads; i++) {
-                System.out.println("thread " + i + " with A[" + aSubArrIndices[i] + ", " + aSubArrIndices[i+1] + ") and B[" + bSubArrIndices[i] + ", " + bSubArrIndices[i+1] + ")");
-                threadPool.submit(new Merge(A, B, C, aSubArrIndices[i], aSubArrIndices[i+1], bSubArrIndices[i], bSubArrIndices[i+1]));
+                threadPool.submit(new Merge(A, B, C));
             }
             threadPool.shutdown();
             threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
@@ -114,18 +87,17 @@ public class PMerge{
     }
 
     public static void main(String[] args) {
-        int[] A = {1, 2, 3, 4, 5};
-        int[] B = {4, 5, 6, 7, 8, 9, 10};
+//        int[] A = {1, 2, 3, 4, 5};
+//        int[] B = {4, 5, 6, 7, 8, 9, 10};
 //        int[] A = {1, 2, 3, 4, 5};
 //        int[] B = {6, 7, 8, 9, 10};
-//        int[] A = {1, 5, 7, 8, 9, 11, 23, 24, 25, 26};
-//        int[] B = {1, 2, 3, 4, 5, 7, 8, 9, 10, 15, 16, 30, 31, 33, 80};
+        int[] A = {0, 1, 5, 7, 8, 9, 11, 23, 24, 25, 26};
+        int[] B = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 15, 16, 30, 31, 33, 80};
         int[] C = new int[A.length + B.length];
-        int numThreads = 5;
+        int numThreads = 100;
 
         printArr(A);
         printArr(B);
-//        printArr(C);
 
         parallelMerge(A, B, C, numThreads);
 
