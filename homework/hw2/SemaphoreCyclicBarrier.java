@@ -1,12 +1,14 @@
-// EID 1
-// EID 2
+// tco343
+// srd2729
 
+import java.util.concurrent.Semaphore;
 
 /* Use only semaphores to accomplish the required synchronization */
 public class SemaphoreCyclicBarrier implements CyclicBarrier {
 
     private int parties;
     // TODO Add other useful variables
+    private Semaphore mutex;
 
     public SemaphoreCyclicBarrier(int parties) {
         this.parties = parties;
