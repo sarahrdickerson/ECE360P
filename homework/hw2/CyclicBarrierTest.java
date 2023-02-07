@@ -47,9 +47,9 @@ public class CyclicBarrierTest implements Runnable {
 		int numRounds = 20;
 
 		CyclicBarrier barrier;
-		// if (args[0].startsWith("s"))
-		// 	barrier = new SemaphoreCyclicBarrier(numParties);
-		// else
+		if (args[0].startsWith("s"))
+			barrier = new SemaphoreCyclicBarrier(numParties);
+		else
 			barrier = new MonitorCyclicBarrier(numParties);
 
 		Thread[] t = new Thread[numParties];

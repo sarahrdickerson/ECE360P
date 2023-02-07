@@ -42,7 +42,8 @@
             "name": "Launch CyclicBarrierTest",
             "request": "launch",
             "mainClass": "CyclicBarrierTest",
-            "projectName": "hw2_ac5b6b56"
+            "projectName": "hw2_ac5b6b56",
+            "args": ["s"]
         }
     ]
 }
