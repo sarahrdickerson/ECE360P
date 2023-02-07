@@ -1,5 +1,6 @@
-// EID 1
-// EID 2
+// tco343
+// srd2729
+
 import java.util.concurrent.Semaphore;
 import java.lang.Thread;
 
