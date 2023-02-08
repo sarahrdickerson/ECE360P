@@ -1,4 +1,4 @@
-public class FairUnfanBathroomTester {
+public class FairUnifanBathroomTester {
     public static void main(String[] args) throws InterruptedException {
         FairUnifanBathroom bathroom = new FairUnifanBathroom();
         int numThreads = 20;
