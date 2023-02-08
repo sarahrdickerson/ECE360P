@@ -1,15 +1,22 @@
 // tco343
 // srd2729
 
+// tco343
+// srd2729
+
 /* Use only Java monitors to accomplish the required synchronization */
 public class MonitorCyclicBarrier implements CyclicBarrier {
 
     private int parties;
-    // TODO Add other useful variables
+    private int count;
+    private int numLeft;
+    private boolean isActive;
 
     public MonitorCyclicBarrier(int parties) {
         this.parties = parties;
-        // TODO Add any other initialization statements
+        this.count = 0;
+        this.numLeft = 0;
+        this.isActive = true;
     }
 
     /*
@@ -24,9 +31,46 @@ public class MonitorCyclicBarrier implements CyclicBarrier {
      * the last to arrive.
      */
     public int await() throws InterruptedException {
-        // TODO Implement this function
-        return -1;
+        // Check if the previous threads have finished
+        checkLeft();
+        // Update the counter and get the arrival index
+        int res = getCount();
+        // Wait until rest of the barrier calls await
+        if(isActive) {
+            checkRest();
+            updateLeft();
+        }
+        //System.out.println("Leaving");
+        return res;
     }
+
+    private synchronized void checkRest() throws InterruptedException {
+        while(count != 0){
+            wait();
+        }
+        notifyAll();
+        //System.out.println("Wait is over");
+    }
+
+    private synchronized void checkLeft() throws InterruptedException {
+        //System.out.println("Want to enter the barrier");
+        while(numLeft != 0)
+            wait();
+        //System.out.println("Entered the barrier");
+    }
+    private synchronized int getCount(){
+        int res = count;
+        count = (count + 1) % parties;
+        //System.out.println("Changed count, count is now " + count);
+        return res;
+    }
+    private synchronized void updateLeft(){
+        numLeft = (numLeft + 1) % parties;
+        //System.out.println("Changed numLeft, it is now " + numLeft);
+        if(numLeft == 0)
+            notifyAll();
+    }
+
 
     /*
      * This method activates the cyclic barrier. If it is already in
@@ -35,7 +79,11 @@ public class MonitorCyclicBarrier implements CyclicBarrier {
      * the state of the barrier is reset to its initial value.
      */
     public void activate() throws InterruptedException {
-        // TODO Implement this function
+        if(isActive)
+            return;
+        isActive = true;
+        count = 0;
+        numLeft = 0;
     }
 
     /*
@@ -43,6 +91,7 @@ public class MonitorCyclicBarrier implements CyclicBarrier {
      * It also releases any waiting threads
      */
     public void deactivate() throws InterruptedException {
-        // TODO Implement this function
+        isActive = false;
+        count = 0;
     }
 }
