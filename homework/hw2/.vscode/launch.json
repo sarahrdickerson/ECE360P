@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "Launch PriorityQueueTester",
+            "request": "launch",
+            "mainClass": "PriorityQueueTester",
+            "projectName": "hw2_ac5b6b56"
+        },
+        {
             "name": "Java",
             "type": "java",
             "request": "launch",
@@ -43,7 +50,9 @@
             "request": "launch",
             "mainClass": "CyclicBarrierTest",
             "projectName": "hw2_ac5b6b56",
-            "args": ["s"]
+            "args": [
+                "s"
+            ]
         }
     ]
 }

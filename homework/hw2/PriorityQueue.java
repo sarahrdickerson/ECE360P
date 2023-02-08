@@ -45,7 +45,6 @@ public class PriorityQueue {
         // This method blocks when the list is full.
                 Node curNode = head;
                 int position = 0;
-                curNode.lock.lock();
 
                 try {
                         // if list is empty
@@ -55,6 +54,7 @@ public class PriorityQueue {
                                 return position;
                         }
                         else { // else list is not empty
+                                curNode.lock.lock();
                                 Node next = curNode.next;
                                 // loop to find position to add Node
                                 while (next != null) { 
@@ -104,7 +104,8 @@ public class PriorityQueue {
                 } catch (Exception e) {
                         e.printStackTrace();
                 } finally {
-                        curNode.lock.unlock();
+                        if(curNode != null)
+                                curNode.lock.unlock();
                         // next unlock?
                 }
                 return 0;
