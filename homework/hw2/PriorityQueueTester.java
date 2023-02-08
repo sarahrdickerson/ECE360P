@@ -26,25 +26,41 @@ public class PriorityQueueTester {
             this.queue = queue;
         }
 
+        public void testAdd() throws InterruptedException {
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1", 0);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1.2", 2);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1.3", 6);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1.4", 0);
+        }
+
+        public void testAll() throws InterruptedException {
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1", 0);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.search("Thread1");
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.getFirst();
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1.2", 2);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1.3", 6);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.getFirst();
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.search("Thread2.1");
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread1.4", 0);
+        }
+
         @Override
         public void run() {
             try {
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.add("Thread1", 0);
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.search("Thread1");
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.getFirst();
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.add("Thread1.2", 2);
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.add("Thread1.3", 6);
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.getFirst();
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.search("Thread2.1");
-                Thread.sleep((long) (Math.random() * 1000));
-                queue.add("Thread1.4", 0);
+                testAdd();
+                // testAll();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -58,10 +74,19 @@ public class PriorityQueueTester {
             this.queue = queue;
         }
 
-        @Override
-        public void run() {
-            try {
-                Thread.sleep((long) (Math.random() * 1000));
+        public void testAdd() throws InterruptedException {
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread2", 0);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread2.2", 3);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread2.3", 9);
+            Thread.sleep((long) (Math.random() * 1000));
+            queue.add("Thread2.4", 0);
+        }
+
+        public void testAll() throws InterruptedException {
+            Thread.sleep((long) (Math.random() * 1000));
                 queue.add("Thread2", 0);
                 Thread.sleep((long) (Math.random() * 1000));
                 queue.search("Thread1");
@@ -77,6 +102,13 @@ public class PriorityQueueTester {
                 queue.search("Thread1.1");
                 Thread.sleep((long) (Math.random() * 1000));
                 queue.add("Thread2.4", 0);
+        }
+
+        @Override
+        public void run() {
+            try {
+                testAdd();
+                // testAll();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
