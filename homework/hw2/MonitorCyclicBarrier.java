@@ -1,9 +1,6 @@
 // tco343
 // srd2729
 
-// tco343
-// srd2729
-
 //* Use only Java monitors to accomplish the required synchronization */
 public class MonitorCyclicBarrier implements CyclicBarrier {
 
