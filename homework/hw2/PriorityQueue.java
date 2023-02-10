@@ -31,6 +31,16 @@ public class PriorityQueue {
                 }
         }
 
+        // FOR TESTING PURPOSES DELETE LATER
+        public void printQueue() {
+                System.out.print("Queue: [");
+                for (Node curNode = head; curNode != null; curNode = curNode.next) {
+                    System.out.print(curNode.name + ", ");
+                }
+                System.out.println("]");
+            }
+
+            
 	public PriorityQueue(int maxSize) {
         // Creates a Priority queue with maximum allowed size as capacity
                 this.maxSize = maxSize;
@@ -45,10 +55,7 @@ public class PriorityQueue {
                 System.out.println("----Adding " + name + " with priority " + priority + " at position " + position);
                 System.out.println("    Current size: " + size);
                 System.out.print("    After add: [");
-                for (Node curNode = head; curNode != null; curNode = curNode.next) {
-                        System.out.print(curNode.name + ", ");
-                }
-                System.out.println("]");
+                printQueue();
         }
         public void lockDebug(String name) {
                 System.out.println("Locking " + name);
@@ -69,6 +76,11 @@ public class PriorityQueue {
                 Node prevNode = null;
 
                 try {
+                        while (size == maxSize) {
+                                System.out.println("Full, waiting...");
+                                printQueue();
+                                notFull.await();
+                        }
                         if (size == 0) {
                                 head = newNode;
                                 size++;
@@ -77,12 +89,7 @@ public class PriorityQueue {
                                 notEmpty.signal();
                                 qLock.unlock();
                                 return position;
-                        } else if (size == maxSize) {
-                                while (size == maxSize) {
-                                        System.out.println("Full, waiting...");
-                                        notFull.await();
-                                }
-                        }
+                        } 
                         else {
                                 // lockDebug(curNode.name);
                                 curNode.lock.lock(); 
@@ -145,7 +152,7 @@ public class PriorityQueue {
                                 curNode.lock.unlock();
                         }
                 }
-	}
+	} 
 
 	public int search(String name) {
         // Returns the position of the name in the list;
@@ -191,7 +198,7 @@ public class PriorityQueue {
                 qLock.lock();
                 
                 try {
-                        if (size == 0) {
+                        while (size == 0) {
                                 System.out.println("Empty, waiting...");
                                 notEmpty.await();
                         }
