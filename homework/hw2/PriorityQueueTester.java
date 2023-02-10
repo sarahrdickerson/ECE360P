@@ -92,6 +92,14 @@ public class PriorityQueueTester {
             }
         }
 
+        public void testEmpty() throws InterruptedException {
+            Thread.sleep((long) (8 * 1000));
+            for(int i = 0; i < 15; i++) {
+                queue.add("Thread1." + i, (int)(Math.random() * 9));
+                Thread.sleep((long) (Math.random() * 1000));
+            }
+        }
+
         @Override
         public void run() {
             try {
@@ -99,7 +107,8 @@ public class PriorityQueueTester {
                 // testSearch();
                 // testGetFirst();
                 // testAll();
-                testFull();
+                // testFull();
+                testEmpty();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -171,10 +180,19 @@ public class PriorityQueueTester {
             }
         }
 
+        public void testEmpty() throws InterruptedException {
+            for (int i = 0; i < 10; i++) {
+                System.out.println("----Getting first element, size now " + queue.size + ": " + queue.getFirst());
+                // printQueue();
+                Thread.sleep((long) (Math.random() * 1000));
+            }
+        }
+
         @Override
         public void run() {
             try {
-                testFull();
+                // testFull();
+                testEmpty();
                 // testAdd();
                 // testSearch();
                 // testAll();
