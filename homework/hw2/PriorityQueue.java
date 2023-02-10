@@ -80,7 +80,10 @@ public class PriorityQueue {
                         // loop to find position to place
                         while (curNode != null) {
                                 // place after curNode
-                                if (curNode.priority <= priority) {
+                                if (curNode.priority >= priority) {
+                                        if (curNode.name.equals(name)) {
+                                                return -1;
+                                        }
                                         if (curNode.next != null) {
                                                 curNode.next.lock.lock();
                                                 // lockDebug(curNode.next.name);
@@ -97,11 +100,8 @@ public class PriorityQueue {
                                                 addDebug(name, priority, position);
                                                 break;
                                         }
-                                        else {
-                                                return -1;
-                                        }
                                         
-                                } else if (curNode.priority > priority) {
+                                } else if (curNode.priority < priority) {
                                         // place before curNode
 
                                         prevNode.lock.lock();

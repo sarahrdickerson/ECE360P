@@ -29,13 +29,13 @@ public class PriorityQueueTester {
 
         public void testAdd() throws InterruptedException {
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread1", 0);
+            queue.add("Thread1", 9);
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread1.2", 2);
+            queue.add("Thread1.2", 8);
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread1.2", 2);
+            queue.add("Thread1.2", 8);
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread1.6", 0);
+            queue.add("Thread1.6", 6);
         }
 
         public void testSearch() throws InterruptedException {
@@ -89,7 +89,7 @@ public class PriorityQueueTester {
         public void run() {
             try {
                 testAdd();
-                // testSearch();
+                testSearch();
                 testGetFirst();
                 // testAll();
             } catch (InterruptedException e) {
@@ -107,11 +107,11 @@ public class PriorityQueueTester {
 
         public void testAdd() throws InterruptedException {
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread2", 0);
+            queue.add("Thread2", 9);
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread2.2", 3);
+            queue.add("Thread2.2", 5);
             Thread.sleep((long) (Math.random() * 1000));
-            queue.add("Thread2.3", 9);
+            queue.add("Thread2.3", 0);
             Thread.sleep((long) (Math.random() * 1000));
             queue.add("Thread2.4", 0);
         }
