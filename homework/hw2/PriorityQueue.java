@@ -66,7 +66,14 @@ public class PriorityQueue {
                                 head = newNode;
                                 size++;
                                 return position;
-                        } else {
+                        } else if (size == maxSize) {
+                                curNode.lock.lock();
+                                while (size == maxSize) {
+                                        curNode.notFull.await();  
+                                }
+                                // curNode.lock.unlock();
+                        }
+                        else {
                                 lockDebug(curNode.name);
                                 curNode.lock.lock();
                         }
