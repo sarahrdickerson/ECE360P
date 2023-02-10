@@ -163,6 +163,7 @@ public class PriorityQueueTester {
         }
 
         public void testFull() throws InterruptedException {
+            Thread.sleep((long) (5 * 1000));
             for (int i = 0; i < 10; i++) {
                 System.out.println("----Getting first element, size now " + queue.size + ": " + queue.getFirst());
                 printQueue();

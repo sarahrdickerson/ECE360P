@@ -118,17 +118,18 @@ public class PriorityQueue {
                                         if(prevNode != null) {
                                                 prevNode.lock.lock();
                                                 prevNode.next = newNode;
+                                                newNode.next = curNode;
+                                                size++;
+                                                addDebug(name, priority, position);
                                                 prevNode.lock.unlock();
                                         } else {
                                                 qLock.lock();
                                                 head = newNode;
-                                                head.lock.lock();
+                                                newNode.next = curNode;
+                                                size++;
+                                                addDebug(name, priority, position);
                                                 qLock.unlock();
                                         }
-
-                                        newNode.next = curNode;
-                                        size++;
-                                        addDebug(name, priority, position);
                                         break;
                                 } else if (curNode.name.equals(name)) {
                                         return -1;
