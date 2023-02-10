@@ -65,13 +65,13 @@ public class PriorityQueue {
                         if (size == 0) {
                                 head = newNode;
                                 size++;
+                                addDebug(name, priority, position);
                                 return position;
                         } else if (size == maxSize) {
                                 curNode.lock.lock();
                                 while (size == maxSize) {
                                         curNode.notFull.await();  
                                 }
-                                // curNode.lock.unlock();
                         }
                         else {
                                 lockDebug(curNode.name);
@@ -79,7 +79,6 @@ public class PriorityQueue {
                         }
                         // loop to find position to place
                         while (curNode != null) {
-                                // curNode.lock.lock();
                                 // place after curNode
                                 if (curNode.priority <= priority) {
                                         if (curNode.next != null) {
@@ -91,12 +90,15 @@ public class PriorityQueue {
                                                 curNode = curNode.next;
                                                 position++;
                                         }
-                                        else {
+                                        else if (!curNode.name.equals(name)) {
                                                 curNode.next = newNode;
                                                 size++;
                                                 position++;
                                                 addDebug(name, priority, position);
                                                 break;
+                                        }
+                                        else {
+                                                return -1;
                                         }
                                         
                                 } else if (curNode.priority > priority) {
@@ -109,20 +111,16 @@ public class PriorityQueue {
                                         newNode.next = curNode;
                                         size++;
                                         addDebug(name, priority, position);
-                                        // position--;
-                                        // curNode.lock.unlock(); 
                                         break;
                                 } else if (curNode.name.equals(name)) {
-                                        // curNode.lock.unlock();
                                         return -1;
                                 }
-                                else { // place at end?
-                                        curNode.next = newNode;
-                                        size++;
-                                        position++;
-                                        break;
-                                }
-                                // curNode.lock.unlock();
+                                // else { // place at end?
+                                //         curNode.next = newNode;
+                                //         size++;
+                                //         position++;
+                                //         break;
+                                // }
                         }
                         return position;
 
@@ -134,140 +132,6 @@ public class PriorityQueue {
                                 curNode.lock.unlock();
                         }
                 }
-                // try {
-                        
-                //         // if list is empty
-                //         if (head == null) {
-                //                 head = newNode;
-                //                 size++;
-
-                //                 addDebug(name, priority);
-
-                //                 return position;
-                //         }
-                //         else if (size == maxSize) {
-                //                 while (size > maxSize) {
-                //                         curNode.notFull.await();
-                //                 }
-                //         }
-                //         else { // else list is not empty        // TODO need to change this to compare current node not curNode.next
-                //                 position = 1;
-                //                 curNode.lock.lock();
-                //                 lockDebug(curNode.name);
-                //                 // Node next = curNode.next;
-                //                 // loop to find position to add Node
-                //                 while (curNode.next != null) { 
-                //                         try {
-                //                                 curNode.next.lock.lock();
-                //                                 lockDebug(curNode.next.name);
-                //                                 // 
-                //                                 if (curNode.next.priority < priority || (curNode.next.priority == priority && curNode.next.name.compareTo(name) <= 0)) {
-                //                                         curNode.lock.unlock();
-                //                                         unlockDebug(curNode.name);
-
-                //                                         curNode = curNode.next;
-                //                                         // Node prevNode = curNode;
-                //                                         // curNode = next;
-                //                                         // prevNode.lock.unlock();
-                //                                         // next = next.next;
-                //                                         position++;
-                //                                 }
-                //                                 else if (curNode.next.name.compareTo(name) > 0) {
-                //                                         curNode.lock.unlock();
-                //                                         unlockDebug(curNode.name);
-
-                //                                         curNode.next = null;
-                //                                         newNode.next = curNode;
-                //                                         // Node prevNode = curNode;
-                //                                         // curNode = next;
-                //                                         // prevNode.lock.unlock();
-                //                                         // next = next.next;
-                //                                         position--;
-                //                                 }
-                //                                 else if (curNode.next.name.equals(name)) {
-                //                                         curNode.next.lock.unlock();
-                //                                         unlockDebug(curNode.next.name);
-                //                                         return -1;
-                //                                 }
-                //                                 else {
-                //                                         break;
-                //                                 }
-
-                //                         } catch (Exception e) {
-                //                                 e.printStackTrace();
-                //                         }
-                //                         // } finally {
-                //                         //         curNode.lock.unlock();
-                //                         // }
-                //                 }
-                //                 // check against last node
-                //                 if (curNode.priority > priority || (curNode.priority == priority && curNode.name.compareTo(name) < 0)) {
-                //                         curNode.lock.unlock();
-                //                         unlockDebug(curNode.name);
-
-                //                         curNode.next = null;
-                //                         newNode.next = curNode;
-                //                         // Node prevNode = curNode;
-                //                         // curNode = next;
-                //                         // prevNode.lock.unlock();
-                //                         // next = next.next;
-                //                         position--;
-                //                 }
-                //                 else {
-                //                         position++;
-                //                 }
-
-                //                 // found position to add, try to add
-                //                 if (size < maxSize) {
-                                        
-                //                         curNode.next = newNode;
-                //                         newNode.lock.lock();
-                //                         lockDebug(newNode.name);
-
-                                        
-                                
-                //                         // newNode.next = null;
-                //                         // curNode.next = newNode;
-
-                //                         // Node prevNode = curNode;
-                //                         // curNode = newNode;
-                //                         // // newNode = null;
-                //                         // prevNode.lock.unlock();
-
-                //                         size++;
-                //                         // position++;
-                //                         addDebug(name, priority);
-
-                //                         curNode.lock.unlock();
-                //                         unlockDebug(curNode.name);
-                //                         curNode = newNode;
-
-                //                         return position;
-                //                 }
-                //                 // else { // list is full
-                //                 //         // wait until list is not full
-                //                 //         while (size == maxSize) {
-                //                 //                 curNode.notFull.await();
-                //                 //         }
-                //                 //         // list is not full, try to add again
-                //                 //         Node newNode = new Node(name, priority);
-                //                 //         newNode.next = curNode.next;
-                //                 //         curNode.next = newNode;
-                //                 //         size++;
-                //                 //         return position;
-                //                 // }
-                //         }
-                // } catch (Exception e) {
-                //         e.printStackTrace();
-                // } finally {
-                //         if(curNode != null)
-                //         {
-                //                 curNode.lock.unlock();
-                //                 unlockDebug(curNode.name);
-                //         }
-                //         // next unlock?
-                // }
-                // return 0;
 	}
 
 	public int search(String name) {
