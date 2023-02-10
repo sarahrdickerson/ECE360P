@@ -115,12 +115,6 @@ public class PriorityQueue {
                                 } else if (curNode.name.equals(name)) {
                                         return -1;
                                 }
-                                // else { // place at end?
-                                //         curNode.next = newNode;
-                                //         size++;
-                                //         position++;
-                                //         break;
-                                // }
                         }
                         return position;
 
@@ -137,7 +131,34 @@ public class PriorityQueue {
 	public int search(String name) {
         // Returns the position of the name in the list;
         // otherwise, returns -1 if the name is not found.
-                return 0;
+                System.out.println("Searching for " + name);
+                Node curNode = head;
+                int position = 0;
+                if (curNode != null)
+                        curNode.lock.lock();
+                while (curNode != null) {
+                        // curNode.lock.lock();
+                        try {
+                                if (curNode.name.equals(name)) {
+                                        System.out.println("Found " + name + " at position " + position);
+                                        curNode.lock.unlock();
+                                        return position;
+                                }
+                                if (curNode.next == null) {
+                                        System.out.println("Could not find " + name);
+                                        curNode.lock.unlock();
+                                        return -1;
+                                }
+                                curNode.next.lock.lock();
+                                curNode.lock.unlock();
+                                curNode = curNode.next;
+                                position++;
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+                }
+                System.out.println("Could not find " + name);
+                return -1;
 	}
 
 	public String getFirst() {
