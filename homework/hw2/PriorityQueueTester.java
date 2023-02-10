@@ -85,13 +85,21 @@ public class PriorityQueueTester {
             queue.add("Thread1.4", 0);
         }
 
+        public void testFull() throws InterruptedException {
+            for(int i = 0; i < 15; i++) {
+                queue.add("Thread1." + i, i);
+                Thread.sleep((long) (Math.random() * 1000));
+            }
+        }
+
         @Override
         public void run() {
             try {
-                testAdd();
-                testSearch();
-                testGetFirst();
+                // testAdd();
+                // testSearch();
+                // testGetFirst();
                 // testAll();
+                testFull();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -146,11 +154,28 @@ public class PriorityQueueTester {
                 queue.add("Thread2.4", 0);
         }
 
+        public void printQueue() {
+            System.out.print("    Queue: [");
+            for (PriorityQueue.Node curNode = queue.head; curNode != null; curNode = curNode.next) {
+                System.out.print(curNode.name + ", ");
+            }
+            System.out.println("]");
+        }
+
+        public void testFull() throws InterruptedException {
+            for (int i = 0; i < 10; i++) {
+                System.out.println("----Getting first element, size now " + queue.size + ": " + queue.getFirst());
+                printQueue();
+                Thread.sleep((long) (Math.random() * 1000));
+            }
+        }
+
         @Override
         public void run() {
             try {
-                testAdd();
-                testSearch();
+                testFull();
+                // testAdd();
+                // testSearch();
                 // testAll();
             } catch (InterruptedException e) {
                 e.printStackTrace();
