@@ -9,7 +9,7 @@ public class PriorityQueue {
         int size;
         Node head;
 
-        private class Node {
+        public class Node {
                 String name;
                 int priority;
 
@@ -36,9 +36,9 @@ public class PriorityQueue {
 	}
 
         public void addDebug(String name, int priority, int position) {
-                System.out.println("Adding " + name + " with priority " + priority + " at position " + position);
-                System.out.println("Current size: " + size);
-                System.out.print("After add: [");
+                System.out.println("----Adding " + name + " with priority " + priority + " at position " + position);
+                System.out.println("    Current size: " + size);
+                System.out.print("    After add: [");
                 for (Node curNode = head; curNode != null; curNode = curNode.next) {
                         System.out.print(curNode.name + ", ");
                 }
@@ -74,7 +74,7 @@ public class PriorityQueue {
                                 }
                         }
                         else {
-                                lockDebug(curNode.name);
+                                // lockDebug(curNode.name);
                                 curNode.lock.lock();
                         }
                         // loop to find position to place
@@ -83,9 +83,9 @@ public class PriorityQueue {
                                 if (curNode.priority <= priority) {
                                         if (curNode.next != null) {
                                                 curNode.next.lock.lock();
-                                                lockDebug(curNode.next.name);
+                                                // lockDebug(curNode.next.name);
                                                 curNode.lock.unlock();
-                                                unlockDebug(curNode.name);
+                                                // unlockDebug(curNode.name);
                                                 prevNode = curNode;
                                                 curNode = curNode.next;
                                                 position++;
@@ -131,7 +131,7 @@ public class PriorityQueue {
 	public int search(String name) {
         // Returns the position of the name in the list;
         // otherwise, returns -1 if the name is not found.
-                System.out.println("Searching for " + name);
+                System.out.println("----Searching for " + name);
                 Node curNode = head;
                 int position = 0;
                 if (curNode != null)
@@ -140,12 +140,12 @@ public class PriorityQueue {
                         // curNode.lock.lock();
                         try {
                                 if (curNode.name.equals(name)) {
-                                        System.out.println("Found " + name + " at position " + position);
+                                        System.out.println("    Found " + name + " at position " + position);
                                         curNode.lock.unlock();
                                         return position;
                                 }
                                 if (curNode.next == null) {
-                                        System.out.println("Could not find " + name);
+                                        System.out.println("    Could not find " + name);
                                         curNode.lock.unlock();
                                         return -1;
                                 }
@@ -157,14 +157,34 @@ public class PriorityQueue {
                                 e.printStackTrace();
                         }
                 }
-                System.out.println("Could not find " + name);
+                System.out.println("    Could not find " + name);
                 return -1;
 	}
 
 	public String getFirst() {
         // Retrieves and removes the name with the highest priority in the list,
         // or blocks the thread if the list is empty.
-                return "";
+                if (size == 0) {
+                        while (size == 0) {}
+                }
+                Node curNode = head;
+                
+                try {
+                        curNode.lock.lock();
+                        if (curNode.next != null) {
+                                curNode.next.lock.lock();
+                        }
+                        head = curNode.next;
+                        if (curNode.next != null) {
+                                curNode.next.lock.unlock();
+                        }
+                        curNode.notFull.signalAll();
+                        curNode.lock.unlock();
+                        return curNode.name;
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                }
 	}
 
 }

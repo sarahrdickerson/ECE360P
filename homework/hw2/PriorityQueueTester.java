@@ -49,6 +49,23 @@ public class PriorityQueueTester {
             queue.search("Thread1.6");
         }
 
+        public void testGetFirst() throws InterruptedException {
+            Thread.sleep((long) (Math.random() * 1000));
+            System.out.println("----Getting first element: " + queue.getFirst());
+            printQueue();
+            Thread.sleep((long) (Math.random() * 1000));
+            System.out.println("----Getting first element: " + queue.getFirst());
+            printQueue();
+        }
+
+        public void printQueue() {
+            System.out.print("Queue: [");
+            for (PriorityQueue.Node curNode = queue.head; curNode != null; curNode = curNode.next) {
+                System.out.print(curNode.name + ", ");
+            }
+            System.out.println("]");
+        }
+
         public void testAll() throws InterruptedException {
             Thread.sleep((long) (Math.random() * 1000));
             queue.add("Thread1", 0);
@@ -72,7 +89,8 @@ public class PriorityQueueTester {
         public void run() {
             try {
                 testAdd();
-                testSearch();
+                // testSearch();
+                testGetFirst();
                 // testAll();
             } catch (InterruptedException e) {
                 e.printStackTrace();
