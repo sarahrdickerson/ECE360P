@@ -13,7 +13,6 @@ public class SemaphoreCyclicBarrier implements CyclicBarrier {
     private Semaphore mutex;
     private Semaphore[] newBarrier;
     private boolean isActivated;
-    private int numLeft;
     private int turn;
 
     public SemaphoreCyclicBarrier(int parties) {
@@ -25,7 +24,6 @@ public class SemaphoreCyclicBarrier implements CyclicBarrier {
         this.newBarrier[1] = new Semaphore(0);
         this.turn = 0;
         this.isActivated = true;
-        this.numLeft = 0;
     }
 
     /*
