@@ -21,12 +21,12 @@ public class FairUnifanBathroom {
         // Called when a UT fan wants to enter bathroom
         mutex.lock();
         int myTicket = totalTicket;
-        System.out.println("UT wants to enter with ticket " + myTicket);
+        //System.out.println("UT wants to enter with ticket " + myTicket);
         totalTicket++;
         while(count == size || turn == 1 || myTicket > nextTicketToEnter)
             isUT.await();
         // Entering
-        System.out.println("UT entered");
+        //System.out.println("UT entered");
         nextTicketToEnter = myTicket + 1;
         if(count == 0)
             turn = 0;
@@ -38,12 +38,12 @@ public class FairUnifanBathroom {
         // Called when a OU fan wants to enter bathroom
         mutex.lock();
         int myTicket = totalTicket;
-        System.out.println("OU wants to enter with ticket " + myTicket);
+        //System.out.println("OU wants to enter with ticket " + myTicket);
         totalTicket++;
         while(count == size || turn == 0 || myTicket > nextTicketToEnter)
             isOU.await();
         // Entering
-        System.out.println("OU entered");
+        //System.out.println("OU entered");
         nextTicketToEnter = myTicket + 1;
         if(count == 0)
             turn = 1;
@@ -59,7 +59,7 @@ public class FairUnifanBathroom {
         isUT.signalAll();
         if(count == 0)
             isOU.signalAll();
-        System.out.println("UT leaving");
+        //System.out.println("UT leaving");
         mutex.unlock();
     }
 
@@ -71,7 +71,7 @@ public class FairUnifanBathroom {
         isOU.signalAll();
         if(count == 0)
             isUT.signalAll();
-        System.out.println("OU leaving");
+        //System.out.println("OU leaving");
         mutex.unlock();
     }
 }
