@@ -1,8 +1,8 @@
 public class PriorityQueueTester {
     public static void main(String[] args) throws InterruptedException{
         // System.out.println("Thread1".compareTo("Thread2"));
-        PriorityQueue queue = new PriorityQueue(5);
-        int numThreads = 2;
+        PriorityQueue queue = new PriorityQueue(10);
+        int numThreads = 4;
         Thread[] threads = new Thread[numThreads];
         for (int i = 0; i < numThreads; i++) {
             if (i%2 == 0) {
@@ -93,7 +93,7 @@ public class PriorityQueueTester {
         }
 
         public void testEmpty() throws InterruptedException {
-            Thread.sleep((long) (8 * 1000));
+            Thread.sleep((long) (5 * 1000));
             for(int i = 0; i < 15; i++) {
                 queue.add("Thread1." + i, (int)(Math.random() * 9));
                 Thread.sleep((long) (Math.random() * 1000));
