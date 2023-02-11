@@ -52,7 +52,7 @@ public class MonitorCyclicBarrier implements CyclicBarrier {
         if(isActivated)
             return;
         isActivated = true;
-        count = 0;
+        //count = 0;
     }
 
     /*
@@ -61,6 +61,5 @@ public class MonitorCyclicBarrier implements CyclicBarrier {
      */
     public void deactivate() {
         isActivated = false;
-
     }
 }
