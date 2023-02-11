@@ -1,28 +1,29 @@
 // tco343
 // srd2729
 
+import javax.crypto.SealedObject;
 import java.util.concurrent.Semaphore;
 import java.lang.Thread;
 
 /* Use only semaphores to accomplish the required synchronization */
 public class SemaphoreCyclicBarrier implements CyclicBarrier {
 
-    private int parties;
+    final private int parties;
+    private int count;
     private Semaphore mutex;
-    private int numArrived;
-    private boolean isActive;
-    private Semaphore lock;
-    private int numLeft;
-    private Semaphore leftLock;
-
+    private Semaphore[] newBarrier;
+    private boolean isActivated;
+    private int turn;
 
     public SemaphoreCyclicBarrier(int parties) {
         this.parties = parties;
-        mutex = new Semaphore(1);
-        lock = new Semaphore(1);
-        leftLock = new Semaphore(1);
-        numArrived = 0;
-        numLeft = 0;
+        this.count = 0;
+        this.mutex = new Semaphore(1);
+        this.newBarrier = new Semaphore[2];
+        this.newBarrier[0] = new Semaphore(0);
+        this.newBarrier[1] = new Semaphore(0);
+        this.turn = 0;
+        this.isActivated = true;
     }
 
     /*
@@ -37,31 +38,27 @@ public class SemaphoreCyclicBarrier implements CyclicBarrier {
      * the last to arrive.
      */
     public int await() throws InterruptedException {
-        // TODO Implement this function
         mutex.acquire();
-        if(numArrived == 0) {
-            lock.acquire();
-        }
-        int res = numArrived;
-        numArrived = (numArrived + 1) % parties;
+        int res = count;
+        count = (count + 1) % parties;
         mutex.release();
-        while(numArrived != 0){
-        }
-        if(res == 0) {
-            System.out.println("0 entered");
-            while (numLeft != parties - 1) {
-                System.out.println("Wait " + numLeft);
+        if(isActivated) {
+            if (count == 0) {
+                if(turn == 0) {
+                    turn = 1;
+                    newBarrier[0].release(parties - 1);
+                }
+                else {
+                    turn = 0;
+                    newBarrier[1].release(parties - 1);
+                }
             }
-        }
-        System.out.println("About to acquire the lock " + res);
-        leftLock.acquire();
-        numLeft = (numLeft + 1) % parties;
-        System.out.println("Res: " + res + " NumLeft: " + numLeft + " Parties - 1: " + (parties - 1));
-        leftLock.release();
-        System.out.println("Res: " + res + " released the lock.");
-        if(res == 0) {
-            numLeft = 0;
-            lock.release();
+            else{
+                if(turn == 0)
+                    newBarrier[0].acquire();
+                else
+                    newBarrier[1].acquire();
+            }
         }
         return res;
     }
@@ -73,9 +70,11 @@ public class SemaphoreCyclicBarrier implements CyclicBarrier {
      * the state of the barrier is reset to its initial value.
      */
     public void activate() throws InterruptedException {
-        // TODO Implement this function
-        isActive = true;
-        numArrived = 0;
+        if(isActivated)
+            return;
+        isActivated = true;
+        newBarrier[0] = new Semaphore(0);
+        newBarrier[1] = new Semaphore(0);
     }
 
     /*
@@ -83,7 +82,8 @@ public class SemaphoreCyclicBarrier implements CyclicBarrier {
      * It also releases any waiting threads
      */
     public void deactivate() throws InterruptedException {
-        // TODO Implement this function
-        isActive = false;
+        isActivated = false;
+        newBarrier[0].release(parties - 1);
+        newBarrier[1].release(parties - 1);
     }
 }
