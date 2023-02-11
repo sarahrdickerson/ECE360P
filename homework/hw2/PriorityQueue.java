@@ -1,126 +1,234 @@
 // tco343
 // srd2729
 
-import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
 public class PriorityQueue {
-        private LinkedList<Node> pQueue;
         int maxSize;
         int size;
         Node head;
+        ReentrantLock qLock;
+        Condition notFull;
+        Condition notEmpty;
 
-        private class Node {
+        public class Node {
                 String name;
                 int priority;
 
                 Node next;
                 ReentrantLock lock; // put lock in Node class to implement hand-over-hand locking instead of using global lock
-                Condition notFull;
-                Condition notEmpty;
+                // Condition notFull;
+                // Condition notEmpty;
 
                 public Node(String name, int priority) {
                         this.name = name;
                         this.priority = priority;
-                        Node next = null;
+                        next = null;
                         lock = new ReentrantLock();
-                        notFull = lock.newCondition();
-                        notEmpty = lock.newCondition();
+                        // notFull = lock.newCondition();
+                        // notEmpty = lock.newCondition();
                 }
         }
 
+        // FOR TESTING PURPOSES DELETE LATER
+        public void printQueue() {
+                System.out.print("Queue: [");
+                for (Node curNode = head; curNode != null; curNode = curNode.next) {
+                    System.out.print(curNode.name + ", ");
+                }
+                System.out.println("]");
+            }
+
+            
 	public PriorityQueue(int maxSize) {
         // Creates a Priority queue with maximum allowed size as capacity
-                pQueue = new LinkedList<Node>();
                 this.maxSize = maxSize;
                 head = null;    // TODO: Do we want to initialize head to null?
                 size = 0;
+                qLock = new ReentrantLock();
+                notFull = qLock.newCondition();
+                notEmpty = qLock.newCondition();
 	}
+
+        public void addDebug(String name, int priority, int position) {
+                System.out.println("----Adding " + name + " with priority " + priority + " at position " + position);
+                System.out.println("    Current size: " + size);
+                System.out.print("    After add: [");
+                printQueue();
+        }
+        public void lockDebug(String name) {
+                System.out.println("Locking " + name);
+        }
+        public void unlockDebug(String name) {
+                System.out.println("Unlocking " + name);
+        }
 
 	public int add(String name, int priority) {
         // Adds the name with its priority to this queue.
         // Returns the current position in the list where the name was inserted;
         // otherwise, returns -1 if the name is already present in the list.
         // This method blocks when the list is full.
+                qLock.lock();
                 Node curNode = head;
                 int position = 0;
+                Node newNode = new Node(name, priority);
+                Node prevNode = null;
 
                 try {
-                        // if list is empty
-                        if (head == null) {
-                                head = new Node(name, priority);
+                        while (size == maxSize) {
+                                System.out.println("Full, waiting...");
+                                printQueue();
+                                notFull.await();
+                        }
+                        if (size == 0) {
+                                head = newNode;
                                 size++;
+                                addDebug(name, priority, position);
+                                prevNode = newNode;
+                                notEmpty.signal();
+                                qLock.unlock();
                                 return position;
+                        } 
+                        else {
+                                // lockDebug(curNode.name);
+                                curNode.lock.lock(); 
+                                qLock.unlock();
                         }
-                        else { // else list is not empty
-                                curNode.lock.lock();
-                                Node next = curNode.next;
-                                // loop to find position to add Node
-                                while (next != null) { 
-                                        next.lock.lock();
-                                        try {
-                                                // 
-                                                if (next.priority < priority || (next.priority == priority && next.name.compareTo(name) < 0)) {
-                                                        curNode = next;
-                                                        next = next.next;
-                                                        position++;
-                                                }
-                                                else if (next.name.equals(name)) {
-                                                        return -1;
-                                                }
-                                                else {
-                                                        break;
-                                                }
-
-                                        } catch (Exception e) {
-                                                e.printStackTrace();
-                                        } finally {
+                        // loop to find position to place
+                        while (curNode != null) {
+                                // place after curNode
+                                if (curNode.priority >= priority) {
+                                        if (curNode.name.equals(name)) {
+                                                return -1;
+                                        }
+                                        if (curNode.next != null) {
+                                                curNode.next.lock.lock();
+                                                // lockDebug(curNode.next.name);
                                                 curNode.lock.unlock();
+                                                // unlockDebug(curNode.name);
+                                                prevNode = curNode;
+                                                curNode = curNode.next;
+                                                position++;
                                         }
-                                }
+                                        else if (!curNode.name.equals(name)) {
+                                                curNode.next = newNode;
+                                                size++;
+                                                position++;
+                                                addDebug(name, priority, position);
+                                                break;
+                                        }
+                                        
+                                } else if (curNode.priority < priority) {
+                                        // place before curNode
 
-                                // found position to add, try to add
-                                if (size < maxSize) {
-                                        Node newNode = new Node(name, priority);
-                                        newNode.next = next;
-                                        curNode.next = newNode;
-                                        size++;
-                                        return position;
-                                }
-                                else { // list is full
-                                        // wait until list is not full
-                                        while (size == maxSize) {
-                                                curNode.notFull.await();
+                                        if(prevNode != null) {
+                                                prevNode.lock.lock();
+                                                prevNode.next = newNode;
+                                                newNode.next = curNode;
+                                                size++;
+                                                addDebug(name, priority, position);
+                                                prevNode.lock.unlock();
+                                        } else {
+                                                qLock.lock();
+                                                head = newNode;
+                                                newNode.next = curNode;
+                                                size++;
+                                                addDebug(name, priority, position);
+                                                qLock.unlock();
                                         }
-                                        // list is not full, try to add again
-                                        Node newNode = new Node(name, priority);
-                                        newNode.next = next;
-                                        curNode.next = newNode;
-                                        size++;
-                                        return position;
+                                        break;
+                                } else if (curNode.name.equals(name)) {
+                                        return -1;
                                 }
                         }
+                        return position;
+
                 } catch (Exception e) {
                         e.printStackTrace();
+                        return -1;
                 } finally {
-                        if(curNode != null)
+                        if(curNode != null) {
                                 curNode.lock.unlock();
-                        // next unlock?
+                        }
                 }
-                return 0;
-	}
+	} 
 
 	public int search(String name) {
         // Returns the position of the name in the list;
         // otherwise, returns -1 if the name is not found.
-                return 0;
+                System.out.println("----Searching for " + name);
+                qLock.lock();
+                Node curNode = head;
+                int position = 0;
+                if (curNode != null) {
+                        curNode.lock.lock();
+                        qLock.unlock();
+                        while (curNode != null) {
+                                // curNode.lock.lock();
+                                try {
+                                        if (curNode.name.equals(name)) {
+                                                System.out.println("    Found " + name + " at position " + position);
+                                                curNode.lock.unlock();
+                                                return position;
+                                        }
+                                        if (curNode.next == null) {
+                                                System.out.println("    Could not find " + name);
+                                                curNode.lock.unlock();
+                                                return -1;
+                                        }
+                                        curNode.next.lock.lock();
+                                        curNode.lock.unlock();
+                                        curNode = curNode.next;
+                                        position++;
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                }
+                        }
+                } else {
+                        qLock.unlock();
+                }
+                System.out.println("    Could not find " + name);
+                return -1;
 	}
 
 	public String getFirst() {
         // Retrieves and removes the name with the highest priority in the list,
         // or blocks the thread if the list is empty.
-                return "";
+                qLock.lock();
+                
+                try {
+                        while (size == 0) {
+                                System.out.println("Empty, waiting...");
+                                notEmpty.await();
+                        }
+                        Node curNode = head;
+                        if (curNode != null) {
+                                curNode.lock.lock();
+
+                                if (curNode.next != null) {
+                                        curNode.next.lock.lock();
+                                }
+                                head = curNode.next;
+                                if (curNode.next != null) {
+                                        curNode.next.lock.unlock();
+                                }
+                                // curNode.notFull.signalAll();
+                                size--;
+                                notFull.signal();
+                                qLock.unlock();
+
+                                curNode.lock.unlock();
+                                return curNode.name;
+                        } else {
+                                qLock.unlock();
+                        }
+                        return null;
+                } catch (Exception e) {
+                        qLock.unlock();
+                        e.printStackTrace();
+                        return null;
+                }
 	}
 
 }
