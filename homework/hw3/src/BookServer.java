@@ -26,7 +26,7 @@ public class BookServer {
         //Terrible implementation, should be changed
         int[] nextLoanId = {1};
 
-        // parse the inventory file
+        // Parse the inventory file and update the hashmap
         File f = new File(fileName);
         Scanner scan = new Scanner(f);
         while(scan.hasNextLine()){
@@ -39,14 +39,15 @@ public class BookServer {
             inventory.put(bookName.substring(0, bookName.length() - 1), quantity);
         }
 
-        // TODO: handle request from clients
+        // Thread to accept UDP connections
+        UDPListener udpListener = new UDPListener(inventory, users, udpPort);
+        udpListener.start();
+
+        // Accept TCP connections and have them running on separate threads
         ServerSocket tcpListener = new ServerSocket(tcpPort);
         Socket s;
-        DatagramSocket updListener = new DatagramSocket(udpPort);
-        DatagramPacket dataPacket;
-        // Accept client connections and have them running on separate threads
         while((s = tcpListener.accept()) != null){
-            System.out.println("Client connected");
+            System.out.println("TCP client connected");
             Thread t = new ServerThread(s, inventory, users, nextLoanId);
             t.start();
         }
