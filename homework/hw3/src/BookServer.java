@@ -38,7 +38,7 @@ public class BookServer {
         }
 
         // Thread to accept UDP connections
-        UDPListener udpListener = new UDPListener(inventory, users, udpPort);
+        UDPListener udpListener = new UDPListener(inventory, users, nextLoanId, udpPort);
         udpListener.start();
 
         // Accept TCP connections and have them running on separate threads
