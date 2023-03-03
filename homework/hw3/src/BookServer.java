@@ -1,7 +1,5 @@
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -48,7 +46,7 @@ public class BookServer {
         Socket s;
         while((s = tcpListener.accept()) != null){
             System.out.println("TCP client connected");
-            Thread t = new ServerThread(s, inventory, users, nextLoanId);
+            Thread t = new TCPClientHandler(s, inventory, users, nextLoanId);
             t.start();
         }
 

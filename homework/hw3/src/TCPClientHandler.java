@@ -4,7 +4,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 
-public class ServerThread extends Thread{
+public class TCPClientHandler extends Thread{
     Socket client;
     Scanner in;
     PrintStream out;
@@ -12,7 +12,7 @@ public class ServerThread extends Thread{
     HashMap<String, List<Loan>> users;
     int[] nextId;
 
-    public ServerThread(Socket client, LinkedHashMap<String, Integer> inventory, HashMap<String, List<Loan>> users, int[] nextId){
+    public TCPClientHandler(Socket client, LinkedHashMap<String, Integer> inventory, HashMap<String, List<Loan>> users, int[] nextId){
         this.client = client;
         try {
             this.in = new Scanner(client.getInputStream());
