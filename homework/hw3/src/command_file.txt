@@ -1,8 +1,8 @@
+set-mode t
 begin-loan Mike "The Letter"
 begin-loan Jack "The Letter"
 begin-loan Lucy "Divergent"
 get-loans Mike
-set-mode u
 end-loan 1
 get-inventory
 exit
