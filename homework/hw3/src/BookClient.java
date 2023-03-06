@@ -100,11 +100,14 @@ public class BookClient {
         tcpPort = 7000;// hardcoded -- must match the server's tcp port
         udpPort = 8000;// hardcoded -- must match the server's udp port
         BookClient myClient = new BookClient();
+
+        // By default we use UDP
+        myClient.udpSocket = new DatagramSocket(udpPort);
         myClient.tcpSocket = new Socket(hostAddress, tcpPort);
         myClient.in = new Scanner(myClient.tcpSocket.getInputStream());
         myClient.out = new PrintStream(myClient.tcpSocket.getOutputStream());
         myClient.pw = new PrintWriter("out_" + clientId + ".txt", "UTF-8");
-        myClient.currentMode = 't';
+        myClient.currentMode = 't'; // still having trouble getting it to even run tho
 
         try {
             Scanner sc = new Scanner(new FileReader(commandFile));

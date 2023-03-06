@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +10,8 @@ public class UDPListener extends Thread{
     LinkedHashMap<String, Integer> inventory;
     HashMap<String, List<Loan>> users;
     int[] nextLoanId;
+    String hostAddress;
+    InetAddress address;
     int port;
 
     public UDPListener(LinkedHashMap<String, Integer> inventory, HashMap<String, List<Loan>> users, int[] nextLoanId, int port){
@@ -16,6 +19,12 @@ public class UDPListener extends Thread{
         this.users = users;
         this.nextLoanId = nextLoanId;
         this.port = port;
+        this.hostAddress = "localhost";
+        try {
+            this.address = InetAddress.getByName(hostAddress);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Have UDP connections running on separate threads
@@ -28,7 +37,7 @@ public class UDPListener extends Thread{
                     dataPacket = new DatagramPacket(buf, buf.length);
                     dataSocket.receive(dataPacket);
                     System.out.println("UDP client connected");
-                    Thread t = new UDPClientHandler(dataSocket, inventory, users, nextLoanId);
+                    Thread t = new UDPClientHandler(dataSocket, address, port, inventory, users, nextLoanId);
                     t.start();
                 }
             } catch (IOException e) {
