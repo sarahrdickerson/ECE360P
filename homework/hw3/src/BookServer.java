@@ -17,8 +17,8 @@ public class BookServer {
             System.exit(-1);
         }
         String fileName = args[0];
-        tcpPort = 7000;
-        udpPort = 8000;
+        tcpPort = 7001;
+        udpPort = 8001;
 
         LinkedHashMap<String, Integer> inventory = new LinkedHashMap<>();
         HashMap<String, List<Loan>> users = new HashMap<>();
@@ -47,7 +47,7 @@ public class BookServer {
         ServerSocket tcpListener = new ServerSocket(tcpPort);
         Socket s;
         while((s = tcpListener.accept()) != null){
-            System.out.println("TCP client connected");
+            //System.out.println("TCP client connected");
             Thread t = new TCPClientHandler(s, inventory, users, nextLoanId, mutex);
             t.start();
         }

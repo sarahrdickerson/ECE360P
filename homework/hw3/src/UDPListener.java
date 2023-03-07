@@ -136,7 +136,7 @@ public class UDPListener extends Thread{
                 dataSocket.receive(dataPacket);
                 String retString = new String(dataPacket.getData(), 0,
                         dataPacket.getLength());
-                System.out.println("Received: " + retString);
+                //System.out.println("Received: " + retString);
                 // Handle the commands
                 String[] tokens = retString.split("\\s+");
                 switch (tokens[0]) {

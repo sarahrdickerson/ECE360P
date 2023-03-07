@@ -177,8 +177,8 @@ public class BookClient {
         BookClient myClient = new BookClient();
         myClient.pw = new PrintWriter("out_" + clientId + ".txt", "UTF-8");
         myClient.hostAddress = "localhost";
-        myClient.tcpPort = 7000;// hardcoded -- must match the server's tcp port
-        myClient.udpPort = 8000;// hardcoded -- must match the server's udp port
+        myClient.tcpPort = 7001;// hardcoded -- must match the server's tcp port
+        myClient.udpPort = 8001;// hardcoded -- must match the server's udp port
 
         myClient.ia = InetAddress.getByName(myClient.hostAddress);
         myClient.udpSocket = new DatagramSocket();
