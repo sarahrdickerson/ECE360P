@@ -91,7 +91,7 @@ public class UDPListener extends Thread{
         StringBuilder sb = new StringBuilder("");
         String outputMessage;
         List<Loan> ll = users.get(username);
-        boolean found = (ll.size() != 0);
+        boolean found = (ll != null && ll.size() != 0);
         if(found){
             for(Loan l : ll)
                 sb.append(l.id + " " + l.name + "\n");

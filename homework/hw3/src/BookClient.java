@@ -52,14 +52,14 @@ public class BookClient {
                 in.close();
                 out.close();
                 tcpSocket.close();
-                udpSocket = new DatagramSocket(udpPort);
+                //udpSocket = new DatagramSocket(udpPort);
                 currentMode = 'u';
             }
         }
         else{
             handleUDP(tokens);
             if(mode.equals("t")){
-                udpSocket.close();
+                //udpSocket.close();
                 tcpSocket = new Socket(hostAddress, tcpPort);
                 in = new Scanner(tcpSocket.getInputStream());
                 out = new PrintStream(tcpSocket.getOutputStream());
@@ -213,6 +213,9 @@ public class BookClient {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        }
+        finally {
+            myClient.pw.close();
         }
     }
 }

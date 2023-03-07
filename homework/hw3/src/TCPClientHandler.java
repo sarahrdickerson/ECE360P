@@ -13,6 +13,7 @@ public class TCPClientHandler extends Thread{
     HashMap<String, List<Loan>> users;
     int[] nextId;
     Semaphore mutex;
+    boolean exit;
 
     public TCPClientHandler(Socket client, LinkedHashMap<String, Integer> inventory, HashMap<String,
             List<Loan>> users, int[] nextId, Semaphore mutex){
@@ -27,6 +28,7 @@ public class TCPClientHandler extends Thread{
         this.users = users;
         this.nextId = nextId;
         this.mutex = mutex;
+        this.exit = false;
     }
 
     public void setMode(String mode) throws IOException {
@@ -38,6 +40,7 @@ public class TCPClientHandler extends Thread{
             in.close();
             out.close();
             client.close();
+            exit = true;
         }
         else{
             outputMessage = "The communication mode is set to TCP";
@@ -99,7 +102,7 @@ public class TCPClientHandler extends Thread{
     public void get_loans(String username) throws InterruptedException {
         mutex.acquire();
         List<Loan> ll = users.get(username);
-        boolean found = (ll.size() != 0);
+        boolean found = (ll != null && ll.size() != 0);
         if(found){
             for(Loan l : ll)
                 out.println("" + l.id + " " + l.name);
@@ -108,6 +111,7 @@ public class TCPClientHandler extends Thread{
         }
         else{
             out.println("No record found for " + username);
+            out.println("DONE");
             out.flush();
         }
         mutex.release();
@@ -135,7 +139,6 @@ public class TCPClientHandler extends Thread{
     }
 
     public void run(){
-        boolean exit = false;
         while(!exit) {
             try {
                 String command = in.nextLine();
