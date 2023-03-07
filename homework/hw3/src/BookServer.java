@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 
 public class BookServer {
     public static void main(String[] args) throws IOException {
@@ -23,6 +24,7 @@ public class BookServer {
         HashMap<String, List<Loan>> users = new HashMap<>();
         //Terrible implementation, should be changed
         int[] nextLoanId = {1};
+        Semaphore mutex = new Semaphore(1);
 
         // Parse the inventory file and update the hashmap
         File f = new File(fileName);
@@ -38,7 +40,7 @@ public class BookServer {
         }
 
         // Thread to accept UDP connections
-        UDPListener udpListener = new UDPListener(inventory, users, nextLoanId, udpPort);
+        UDPListener udpListener = new UDPListener(inventory, users, nextLoanId, udpPort, mutex);
         udpListener.start();
 
         // Accept TCP connections and have them running on separate threads
@@ -46,7 +48,7 @@ public class BookServer {
         Socket s;
         while((s = tcpListener.accept()) != null){
             System.out.println("TCP client connected");
-            Thread t = new TCPClientHandler(s, inventory, users, nextLoanId);
+            Thread t = new TCPClientHandler(s, inventory, users, nextLoanId, mutex);
             t.start();
         }
 

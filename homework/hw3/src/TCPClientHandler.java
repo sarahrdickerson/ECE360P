@@ -3,6 +3,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 public class TCPClientHandler extends Thread{
     Socket client;
@@ -11,8 +12,10 @@ public class TCPClientHandler extends Thread{
     LinkedHashMap<String, Integer> inventory;
     HashMap<String, List<Loan>> users;
     int[] nextId;
+    Semaphore mutex;
 
-    public TCPClientHandler(Socket client, LinkedHashMap<String, Integer> inventory, HashMap<String, List<Loan>> users, int[] nextId){
+    public TCPClientHandler(Socket client, LinkedHashMap<String, Integer> inventory, HashMap<String,
+            List<Loan>> users, int[] nextId, Semaphore mutex){
         this.client = client;
         try {
             this.in = new Scanner(client.getInputStream());
@@ -23,6 +26,7 @@ public class TCPClientHandler extends Thread{
         this.inventory = inventory;
         this.users = users;
         this.nextId = nextId;
+        this.mutex = mutex;
     }
 
     public void setMode(String mode) throws IOException {
@@ -42,7 +46,8 @@ public class TCPClientHandler extends Thread{
         }
     }
 
-    public void beginLoan(String username, String bookname){
+    public void beginLoan(String username, String bookname) throws InterruptedException {
+        mutex.acquire();
         String outputMessage;
         if(!inventory.containsKey(bookname))
             outputMessage = "Request Failed - We do not have this book";
@@ -63,9 +68,11 @@ public class TCPClientHandler extends Thread{
         }
         out.println(outputMessage);
         out.flush();
+        mutex.release();
     }
 
-    public void end_loan(int loan_id){
+    public void end_loan(int loan_id) throws InterruptedException {
+        mutex.acquire();
         String outputMessage;
         boolean found = false;
         for(List<Loan> ll : users.values()){
@@ -86,9 +93,11 @@ public class TCPClientHandler extends Thread{
             outputMessage = "" + loan_id + " not found, no such borrow record";
         out.println(outputMessage);
         out.flush();
+        mutex.release();
     }
 
-    public void get_loans(String username){
+    public void get_loans(String username) throws InterruptedException {
+        mutex.acquire();
         List<Loan> ll = users.get(username);
         boolean found = (ll.size() != 0);
         if(found){
@@ -101,16 +110,20 @@ public class TCPClientHandler extends Thread{
             out.println("No record found for " + username);
             out.flush();
         }
+        mutex.release();
     }
 
-    public void get_inventory(){
+    public void get_inventory() throws InterruptedException {
+        mutex.acquire();
         for(Map.Entry<String, Integer> entry : inventory.entrySet())
             out.println(entry.getKey() + " " + entry.getValue());
         out.println("DONE");
         out.flush();
+        mutex.release();
     }
 
-    public void exit() throws IOException {
+    public void exit() throws IOException, InterruptedException {
+        mutex.acquire();
         PrintWriter pw = new PrintWriter("inventory.txt", "UTF-8");
         for(Map.Entry<String, Integer> entry : inventory.entrySet())
             pw.println(entry.getKey() + " " + entry.getValue());
@@ -118,6 +131,7 @@ public class TCPClientHandler extends Thread{
         in.close();
         out.close();
         client.close();
+        mutex.release();
     }
 
     public void run(){
