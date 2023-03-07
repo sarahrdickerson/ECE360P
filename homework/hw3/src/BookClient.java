@@ -1,15 +1,43 @@
 import java.io.*;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class BookClient {
+    // To be used for TCP
     Scanner in;
     PrintStream out;
     Socket tcpSocket;
+    int tcpPort;
+
+    // To be used for UDP
     DatagramSocket udpSocket;
+    InetAddress ia;
+    DatagramPacket sPacket, rPacket;
+    int udpPort;
+    byte[] rbuffer = new byte[4096];
+    // Common
     PrintWriter pw;
     char currentMode;
+    String hostAddress;
+
+    public void handleUDP(String[] tokens) throws IOException {
+        String sendMessage = "";
+        for(int i = 0; i < tokens.length; i++){
+            sendMessage += tokens[i];
+            if(i != tokens.length - 1)
+                sendMessage += " ";
+        }
+        byte[] buffer = sendMessage.getBytes();
+        sPacket = new DatagramPacket(buffer, buffer.length, ia, udpPort);
+        udpSocket.send(sPacket);
+        rPacket = new DatagramPacket(rbuffer, rbuffer.length);
+        udpSocket.receive(rPacket);
+        String returnMessage = new String(rPacket.getData(), 0, rPacket.getLength ());
+        pw.println(returnMessage);
+    }
 
     public void set_mode(String[] tokens) throws IOException {
         String mode = tokens[1];
@@ -24,61 +52,111 @@ public class BookClient {
                 in.close();
                 out.close();
                 tcpSocket.close();
-                udpSocket = new DatagramSocket(8000);
+                udpSocket = new DatagramSocket(udpPort);
+                currentMode = 'u';
+            }
+        }
+        else{
+            handleUDP(tokens);
+            if(mode.equals("t")){
+                udpSocket.close();
+                tcpSocket = new Socket(hostAddress, tcpPort);
+                in = new Scanner(tcpSocket.getInputStream());
+                out = new PrintStream(tcpSocket.getOutputStream());
+                currentMode = 't';
             }
         }
     }
 
-    public void beginLoan(String[] tokens){
-        out.println(tokens[0]);
-        out.println(tokens[1]);
-        // Send the bookname as a whole string
-        String bookname = "";
-        for(int i = 2; i < tokens.length; i++) {
-            bookname += tokens[i];
-            bookname += " ";
+    public void beginLoan(String[] tokens) throws IOException {
+        if(currentMode == 't') {
+            out.println(tokens[0]);
+            out.println(tokens[1]);
+            // Send the bookname as a whole string
+            String bookname = "";
+            for (int i = 2; i < tokens.length; i++) {
+                bookname += tokens[i];
+                bookname += " ";
+            }
+            bookname = bookname.substring(0, bookname.length() - 1);
+            out.println(bookname);
+            out.flush();
+            String returnMessage = in.nextLine();
+            pw.println(returnMessage);
         }
-        bookname = bookname.substring(0, bookname.length()- 1);
-        out.println(bookname);
-        out.flush();
-        String returnMessage = in.nextLine();
-        pw.println(returnMessage);
-    }
-
-    public void endLoan(String[] tokens){
-        out.println(tokens[0]);
-        out.println(tokens[1]);
-        out.flush();
-        String returnMessage = in.nextLine();
-        pw.println(returnMessage);
-    }
-
-    public void getLoans(String[] tokens){
-        out.println(tokens[0]);
-        out.println(tokens[1]);
-        out.flush();
-        while(true){
-            String line = in.nextLine();
-            if(line.equals("DONE"))
-                break;
-            pw.println(line);
+        else{
+            handleUDP(tokens);
         }
     }
 
-    public void getInventory(String[] tokens){
-        out.println(tokens[0]);
-        out.flush();
-        while(true){
-            String line = in.nextLine();
-            if(line.equals("DONE"))
-                break;
-            pw.println(line);
+    public void endLoan(String[] tokens) throws IOException {
+        if(currentMode == 't') {
+            out.println(tokens[0]);
+            out.println(tokens[1]);
+            out.flush();
+            String returnMessage = in.nextLine();
+            pw.println(returnMessage);
+        }
+        else {
+            handleUDP(tokens);
         }
     }
 
-    public void exit(String[] tokens){
-        out.println(tokens[0]);
-        out.flush();
+    public void getLoans(String[] tokens) throws IOException {
+        if(currentMode == 't') {
+            out.println(tokens[0]);
+            out.println(tokens[1]);
+            out.flush();
+            while (true) {
+                String line = in.nextLine();
+                if (line.equals("DONE"))
+                    break;
+                pw.println(line);
+            }
+        }
+        else{
+            handleUDP(tokens);
+        }
+    }
+
+    public void getInventory(String[] tokens) throws IOException {
+        if(currentMode == 't') {
+            out.println(tokens[0]);
+            out.flush();
+            while (true) {
+                String line = in.nextLine();
+                if (line.equals("DONE"))
+                    break;
+                pw.println(line);
+            }
+        }
+        else{
+            handleUDP(tokens);
+        }
+    }
+
+    public void exit(String[] tokens) throws IOException {
+        if(currentMode == 't') {
+            out.println(tokens[0]);
+            out.flush();
+            pw.close();
+            in.close();
+            out.close();
+            tcpSocket.close();
+        }
+        else{
+            String sendMessage = "";
+            for(int i = 0; i < tokens.length; i++){
+                sendMessage += tokens[i];
+                if(i != tokens.length - 1)
+                    sendMessage += " ";
+            }
+            byte[] buffer = sendMessage.getBytes();
+            sPacket = new DatagramPacket(buffer, buffer.length, ia, udpPort);
+            udpSocket.send(sPacket);
+            pw.close();
+            udpSocket.close();
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -96,18 +174,15 @@ public class BookClient {
 
         String commandFile = args[0];
         clientId = Integer.parseInt(args[1]);
-        hostAddress = "localhost";
-        tcpPort = 7000;// hardcoded -- must match the server's tcp port
-        udpPort = 8000;// hardcoded -- must match the server's udp port
         BookClient myClient = new BookClient();
-
-        // By default we use UDP
-        myClient.udpSocket = new DatagramSocket(udpPort);
-        myClient.tcpSocket = new Socket(hostAddress, tcpPort);
-        myClient.in = new Scanner(myClient.tcpSocket.getInputStream());
-        myClient.out = new PrintStream(myClient.tcpSocket.getOutputStream());
         myClient.pw = new PrintWriter("out_" + clientId + ".txt", "UTF-8");
-        myClient.currentMode = 't'; // still having trouble getting it to even run tho
+        myClient.hostAddress = "localhost";
+        myClient.tcpPort = 7000;// hardcoded -- must match the server's tcp port
+        myClient.udpPort = 8000;// hardcoded -- must match the server's udp port
+
+        myClient.ia = InetAddress.getByName(myClient.hostAddress);
+        myClient.udpSocket = new DatagramSocket();
+        myClient.currentMode = 'u';
 
         try {
             Scanner sc = new Scanner(new FileReader(commandFile));
@@ -117,30 +192,21 @@ public class BookClient {
                 String[] tokens = cmd.split(" ");
 
                 if (tokens[0].equals("set-mode")) {
-                    // TODO: set the mode of communication for sending commands to the server
                     myClient.set_mode(tokens);
                 } else if (tokens[0].equals("begin-loan")) {
-                    // TODO: send appropriate command to the server and display the
                     myClient.beginLoan(tokens);
                     // appropriate responses form the server
                 } else if (tokens[0].equals("end-loan")) {
-                    // TODO: send appropriate command to the server and display the
                     myClient.endLoan(tokens);
                     // appropriate responses form the server
                 } else if (tokens[0].equals("get-loans")) {
-                    // TODO: send appropriate command to the server and display the
                     myClient.getLoans(tokens);
                     // appropriate responses form the server
                 } else if (tokens[0].equals("get-inventory")) {
-                    // TODO: send appropriate command to the server and display the
                     myClient.getInventory(tokens);
                     // appropriate responses form the server
                 } else if (tokens[0].equals("exit")) {
                     myClient.exit(tokens);
-                    myClient.pw.close();
-                    myClient.in.close();
-                    myClient.out.close();
-                    myClient.tcpSocket.close();
                 } else {
                     System.out.println("ERROR: No such command");
                 }
